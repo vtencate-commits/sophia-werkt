@@ -1,0 +1,57 @@
+{
+    email {$ACME_EMAIL}
+}
+
+(security_headers) {
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+}
+
+sophiawerkt.nl, www.sophiawerkt.nl {
+    import security_headers
+    encode zstd gzip
+    reverse_proxy client-portal:3000 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+
+kantoor.sophiawerkt.nl {
+    import security_headers
+    encode zstd gzip
+    reverse_proxy lawyer-portal:3002 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+
+admin.sophiawerkt.nl {
+    import security_headers
+    encode zstd gzip
+    reverse_proxy admin-portal:3003 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+
+api.sophiawerkt.nl {
+    import security_headers
+    encode zstd gzip
+    request_body {
+        max_size 50MB
+    }
+    reverse_proxy api:3001 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}

@@ -1,0 +1,304 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  LAWYER
+  ADMIN
+}
+
+enum CaseStatus {
+  INTAKE
+  DOCUMENTS_RECEIVED
+  AI_ANALYSIS_PENDING
+  AI_ANALYSIS_COMPLETE
+  LAWYER_REVIEW
+  ADVICE_DRAFT
+  ADVICE_FINAL
+  DELIVERED
+  FOLLOW_UP
+  CLOSED
+  ARCHIVED
+}
+
+enum AdviceType {
+  VSO_REVIEW
+  VSO_NEGOTIATION
+  DISMISSAL_ADVICE
+  LABOR_DISPUTE
+  NON_COMPETE_CHECK
+  OTHER
+}
+
+enum FeeType {
+  FIXED
+  HOURLY
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum DocumentCategory {
+  EMPLOYMENT_CONTRACT
+  VSO
+  SOCIAL_PLAN
+  CAO
+  PAYSLIP
+  CORRESPONDENCE
+  AI_ANALYSIS
+  LEGAL_ADVICE
+  INVOICE
+  CLIENT_UPLOAD
+  LAWYER_UPLOAD
+  OTHER
+}
+
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  passwordHash        String
+  firstName           String
+  lastName            String
+  phone               String?
+  role                Role      @default(CLIENT)
+  twoFactorEnabled    Boolean   @default(false)
+  twoFactorSecret     String?
+  isActive            Boolean   @default(true)
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  casesAsClient  Case[]         @relation("ClientCases")
+  casesAsLawyer  Case[]         @relation("LawyerCases")
+  documents      Document[]
+  messagesSent   Message[]
+  timeEntries    TimeEntry[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]     @relation("UserAuditLogs")
+  refreshTokens  RefreshToken[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model Case {
+  id              String     @id @default(cuid())
+  referenceNumber String     @unique
+  title           String
+  description     String?
+  adviceType      AdviceType
+  status          CaseStatus @default(INTAKE)
+  feeType         FeeType    @default(FIXED)
+  feeAmount       Decimal    @default(750)
+  feeCurrency     String     @default("EUR")
+
+  employerName    String?
+  employerKvk     String?
+  conflictChecked Boolean    @default(false)
+  conflictFound   Boolean    @default(false)
+  conflictNotes   String?
+  clientNotes     String?
+  caoReference    String?
+
+  aiAnalysisRaw  String?
+  aiAnalysisHtml String?
+  aiAnalysisAt   DateTime?
+  aiTokensUsed   Int?
+
+  adviceDraft       String?
+  adviceFinal       String?
+  adviceApprovedAt  DateTime?
+  adviceDeliveredAt DateTime?
+
+  clientId String
+  client   User   @relation("ClientCases", fields: [clientId], references: [id])
+  lawyerId String?
+  lawyer   User?  @relation("LawyerCases", fields: [lawyerId], references: [id])
+
+  documents     Document[]
+  messages      Message[]
+  timeEntries   TimeEntry[]
+  invoices      Invoice[]
+  statusHistory CaseStatusHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([lawyerId])
+  @@index([status])
+  @@index([referenceNumber])
+}
+
+model CaseStatusHistory {
+  id         String      @id @default(cuid())
+  caseId     String
+  case       Case        @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  fromStatus CaseStatus?
+  toStatus   CaseStatus
+  changedBy  String?
+  notes      String?
+  createdAt  DateTime    @default(now())
+
+  @@index([caseId])
+}
+
+model Document {
+  id               String           @id @default(cuid())
+  caseId           String
+  case             Case             @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  uploadedById     String
+  uploadedBy       User             @relation(fields: [uploadedById], references: [id])
+  filename         String
+  originalFilename String
+  mimeType         String
+  sizeBytes        Int
+  storageKey       String
+  category         DocumentCategory @default(CLIENT_UPLOAD)
+  version          Int              @default(1)
+  isVisible        Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+
+  @@index([caseId])
+  @@index([category])
+}
+
+model Message {
+  id            String   @id @default(cuid())
+  caseId        String
+  case          Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  senderId      String
+  sender        User     @relation(fields: [senderId], references: [id])
+  body          String
+  isRead        Boolean  @default(false)
+  readAt        DateTime?
+  attachmentKey String?
+  createdAt     DateTime @default(now())
+
+  @@index([caseId])
+  @@index([senderId])
+}
+
+model TimeEntry {
+  id              String   @id @default(cuid())
+  caseId          String
+  case            Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  date            DateTime
+  durationMinutes Int
+  description     String
+  activityType    String
+  billable        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([caseId])
+  @@index([userId])
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  caseId        String
+  case          Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  invoiceNumber String        @unique
+  amount        Decimal
+  vatAmount     Decimal
+  totalAmount   Decimal
+  description   String?
+  lineItems     Json
+  status        InvoiceStatus @default(DRAFT)
+  dueDate       DateTime?
+  paidAt        DateTime?
+  pdfStorageKey String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([caseId])
+  @@index([status])
+}
+
+model Notification {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String
+  title         String
+  body          String
+  isRead        Boolean  @default(false)
+  referenceType String?
+  referenceId   String?
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation("UserAuditLogs", fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([createdAt])
+}
+
+model AiSkill {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  category     String
+  systemPrompt String
+  isActive     Boolean  @default(true)
+  version      Int      @default(1)
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PricingConfig {
+  id          String     @id @default(cuid())
+  adviceType  AdviceType
+  amount      Decimal
+  currency    String     @default("EUR")
+  description String?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([adviceType])
+}

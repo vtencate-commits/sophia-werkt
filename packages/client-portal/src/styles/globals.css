@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+:root {
+  --sophia-primary: #1e3a5f;
+  --sophia-secondary: #4a90d9;
+  --sophia-accent: #f5a623;
+  --sophia-success: #27ae60;
+  --sophia-warning: #f39c12;
+  --sophia-danger: #e74c3c;
+  --sophia-bg: #f8fafc;
+  --sophia-card: #ffffff;
+  --sophia-text: #1a202c;
+  --sophia-muted: #718096;
+}
+
+* {
+  @apply transition-colors duration-200;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-sophia-bg text-sophia-text font-sans;
+}
+
+/* Typography */
+h1 {
+  @apply text-3xl font-bold tracking-tight;
+}
+
+h2 {
+  @apply text-2xl font-bold tracking-tight;
+}
+
+h3 {
+  @apply text-xl font-semibold;
+}
+
+h4 {
+  @apply text-lg font-semibold;
+}
+
+p {
+  @apply leading-relaxed;
+}
+
+a {
+  @apply text-sophia-secondary hover:text-sophia-primary transition-colors;
+}
+
+/* Form elements */
+input,
+textarea,
+select {
+  @apply rounded-md border border-gray-300 px-3 py-2 text-sophia-text placeholder-sophia-muted focus:border-sophia-secondary focus:outline-none focus:ring-2 focus:ring-sophia-secondary focus:ring-opacity-20;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* Utility classes */
+.container {
+  @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+.card {
+  @apply rounded-lg border border-gray-200 bg-sophia-card shadow-sm;
+}
+
+.badge {
+  @apply inline-block rounded-full px-3 py-1 text-sm font-medium;
+}
+
+.badge-success {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-info {
+  @apply bg-blue-100 text-blue-800;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  @apply h-2 w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-gray-300 hover:bg-gray-400;
+}
+
+/* Loading skeleton */
+.skeleton {
+  @apply animate-pulse rounded-md bg-gray-200;
+}
+
+/* Focus ring for accessibility */
+.focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sophia-secondary focus-visible:ring-offset-2;
+}

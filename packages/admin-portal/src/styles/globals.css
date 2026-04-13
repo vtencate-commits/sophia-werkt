@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-secondary: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-surface: #f9fafb;
+  --color-border: #e5e7eb;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+}
+
+* {
+  border-color: var(--color-border, #e5e7eb);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-color-surface text-color-text-primary;
+}
+
+/* Sophia styles */
+.sophia-card {
+  @apply bg-white rounded-lg border border-color-border shadow-sm;
+}
+
+.sophia-btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors;
+}
+
+.sophia-btn-primary {
+  @apply sophia-btn bg-color-primary text-white hover:bg-color-primary-dark;
+}
+
+.sophia-btn-secondary {
+  @apply sophia-btn bg-gray-200 text-color-text-primary hover:bg-gray-300;
+}
+
+.sophia-btn-danger {
+  @apply sophia-btn bg-color-danger text-white hover:bg-red-600;
+}
+
+.sophia-input {
+  @apply w-full px-3 py-2 border border-color-border rounded-lg text-color-text-primary placeholder-color-text-secondary focus:outline-none focus:ring-2 focus:ring-color-primary focus:border-transparent;
+}
+
+.sophia-table {
+  @apply w-full border-collapse;
+}
+
+.sophia-table th {
+  @apply bg-gray-100 px-6 py-3 text-left text-sm font-semibold text-color-text-primary border-b border-color-border;
+}
+
+.sophia-table td {
+  @apply px-6 py-3 border-b border-color-border text-sm text-color-text-primary;
+}
+
+.sophia-table tbody tr:hover {
+  @apply bg-gray-50;
+}
+
+.sophia-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.sophia-badge-success {
+  @apply sophia-badge bg-green-100 text-green-800;
+}
+
+.sophia-badge-danger {
+  @apply sophia-badge bg-red-100 text-red-800;
+}
+
+.sophia-badge-warning {
+  @apply sophia-badge bg-yellow-100 text-yellow-800;
+}
+
+.sophia-badge-info {
+  @apply sophia-badge bg-blue-100 text-blue-800;
+}
+
+.sophia-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+.sophia-modal {
+  @apply bg-white rounded-lg shadow-lg max-w-md w-full mx-4;
+}

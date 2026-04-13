@@ -1,0 +1,29 @@
+{
+  "name": "sophia-werkt",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "db:generate": "turbo run db:generate --filter=@sophia-werkt/db",
+    "db:migrate": "turbo run db:migrate --filter=@sophia-werkt/db",
+    "db:seed": "turbo run db:seed --filter=@sophia-werkt/db",
+    "db:studio": "turbo run db:studio --filter=@sophia-werkt/db",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0",
+    "@types/node": "^20.14.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "packageManager": "npm@10.8.0"
+}

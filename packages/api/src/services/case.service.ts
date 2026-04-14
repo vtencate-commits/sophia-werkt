@@ -165,9 +165,14 @@ export class CaseService {
     const totalInvoiced = invoices.reduce((sum: number, inv: { totalAmount: any }) => sum + Number(inv.totalAmount), 0);
     const totalTimeMinutes = timeEntries.reduce((sum: number, entry: { durationMinutes: number }) => sum + entry.durationMinutes, 0);
 
+    const pendingInvoices = invoices.filter((inv: { status: string }) => inv.status !== 'PAID').length;
+
     return {
       feeType: caseData.feeType,
       feeAmount: caseData.feeAmount,
       totalInvoiced,
       totalTimeMinutes,
-      pendingInvoices
+      pendingInvoices,
+    };
+  }
+}

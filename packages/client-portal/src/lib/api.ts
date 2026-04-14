@@ -4,6 +4,22 @@ interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
 }
 
+function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('accessToken');
+}
+
+function getRefreshToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('refreshToken');
+}
+
+function setTokens(accessToken: string, refreshToken: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('accessToken', accessToken);
+  localStorage.setItem('refreshToken', refreshToken);
+}
+
 export async function fetchApiClient<T = unknown>(
   endpoint: string,
   options: FetchOptions = {}
@@ -17,7 +33,7 @@ export async function fetchApiClient<T = unknown>(
   };
 
   if (!skipAuth) {
-    const token = localStorage.getItem('accessToken');
+    const token = getAccessToken();
     if (token) {
       mergedHeaders['Authorization'] = `Bearer ${token}`;
     }
@@ -29,10 +45,10 @@ export async function fetchApiClient<T = unknown>(
   });
 
   if (response.status === 401 && !skipAuth) {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = getRefreshToken();
     if (refreshToken) {
       try {
-        const refreshResponse = await fetch(`${API_URL}/auth/refresh`, {
+        const refreshResponse = await fetch(`${API_URL}/api/v1/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refreshToken }),
@@ -40,8 +56,7 @@ export async function fetchApiClient<T = unknown>(
 
         if (refreshResponse.ok) {
           const data = await refreshResponse.json();
-          localStorage.setItem('accessToken', data.accessToken);
-          localStorage.setItem('refreshToken', data.refreshToken);
+          setTokens(data.accessToken, data.refreshToken);
           mergedHeaders['Authorization'] = `Bearer ${data.accessToken}`;
 
           response = await fetch(url, {
@@ -62,3 +77,28 @@ export async function fetchApiClient<T = unknown>(
 
   return response.json() as Promise<T>;
 }
+
+export const api = {
+  get: <T = unknown>(endpoint: string, options?: FetchOptions) =>
+    fetchApiClient<T>(endpoint, { ...options, method: 'GET' }),
+  post: <T = unknown>(endpoint: string, body?: unknown, options?: FetchOptions) =>
+    fetchApiClient<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+  patch: <T = unknown>(endpoint: string, body?: unknown, options?: FetchOptions) =>
+    fetchApiClient<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+  put: <T = unknown>(endpoint: string, body?: unknown, options?: FetchOptions) =>
+    fetchApiClient<T>(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+  delete: <T = unknown>(endpoint: string, options?: FetchOptions) =>
+    fetchApiClient<T>(endpoint, { ...options, method: 'DELETE' }),
+};

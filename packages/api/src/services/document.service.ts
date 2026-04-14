@@ -41,6 +41,7 @@ export class DocumentService {
         originalFilename: file.filename,
         mimeType: file.mimetype,
         sizeBytes: file.size,
+        storageKey: uploadedFile.key,
         category,
         version: nextVersion,
         isVisible,

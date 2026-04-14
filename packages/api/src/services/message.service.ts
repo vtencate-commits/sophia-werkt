@@ -30,10 +30,10 @@ export class MessageService {
     });
 
     // Create notification for case participants
-    const participants = [
+    const participants: string[] = [
       caseData.clientId,
       caseData.lawyerId,
-    ].filter(Boolean);
+    ].filter((id): id is string => id !== null && id !== undefined);
 
     for (const participantId of participants) {
       if (participantId !== userId) {

@@ -53,14 +53,7 @@ export class InvoiceService {
         description: data.description,
         status: 'DRAFT',
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
-        lineItems: {
-          createMany: {
-            data: data.lineItems,
-          },
-        },
-      },
-      include: {
-        lineItems: true,
+        lineItems: data.lineItems as unknown as object,
       },
     });
 
@@ -70,9 +63,6 @@ export class InvoiceService {
   async getInvoices(caseId: string): Promise<any[]> {
     return prisma.invoice.findMany({
       where: { caseId },
-      include: {
-        lineItems: true,
-      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -80,9 +70,6 @@ export class InvoiceService {
   async getInvoice(invoiceId: string): Promise<any> {
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
-      include: {
-        lineItems: true,
-      },
     });
 
     if (!invoice) {
@@ -104,9 +91,6 @@ export class InvoiceService {
     return prisma.invoice.update({
       where: { id: invoiceId },
       data: updateData,
-      include: {
-        lineItems: true,
-      },
     });
   }
 }

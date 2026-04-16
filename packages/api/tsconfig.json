@@ -5,8 +5,9 @@
     "rootDir": "./src",
     "noEmit": false,
     "declaration": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
     "paths": {
       "@/*": ["./src/*"]
     }

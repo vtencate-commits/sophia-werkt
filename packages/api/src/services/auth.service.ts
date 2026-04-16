@@ -170,10 +170,8 @@ export class AuthService {
     }
 
     // Generate reset token as a short-lived JWT (not stored)
-    this.fastify.jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, type: 'reset' },
-      { expiresIn: '1h' }
-    );
+    const resetPayload = { userId: user.id, email: user.email, role: user.role, type: 'reset' };
+    this.fastify.jwt.sign(resetPayload as unknown as TokenPayload, { expiresIn: '1h' });
 
     // TODO: Send email with reset token
   }

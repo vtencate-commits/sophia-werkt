@@ -12,6 +12,8 @@ RUN npm ci --include=dev --workspaces --include-workspace-root
 
 FROM deps AS build
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_PUBLIC_API_URL=https://api.sophiawerkt.nl
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 COPY packages/shared ./packages/shared
 COPY packages/ui ./packages/ui
 COPY packages/lawyer-portal ./packages/lawyer-portal

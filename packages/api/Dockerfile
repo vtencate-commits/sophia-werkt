@@ -34,6 +34,6 @@ COPY --from=build /app/packages/db/src ./packages/db/src
 USER sophia
 EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD wget -qO- http://localhost:3001/health || exit 1
+  CMD node -e "const http=require('http');http.get('http://127.0.0.1:3001/health',r=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"
 WORKDIR /app/packages/api
 CMD ["node", "dist/server.js"]

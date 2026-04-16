@@ -35,5 +35,5 @@ USER nextjs
 EXPOSE 3002
 WORKDIR /app/packages/lawyer-portal
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD wget -qO- http://localhost:3002/ || exit 1
+  CMD node -e "const http=require('http');http.get('http://127.0.0.1:3002/',r=>{process.exit(r.statusCode<500?0:1)}).on('error',()=>process.exit(1))"
 CMD ["npx", "next", "start", "--port", "3002"]

@@ -124,7 +124,7 @@ export class CaseService {
     }
 
     // Create timeline entry
-    await prisma.caseTimeline.create({
+    await prisma.caseStatusHistory.create({
       data: {
         caseId,
         fromStatus: caseData.status,
@@ -139,7 +139,7 @@ export class CaseService {
   }
 
   async getTimeline(caseId: string): Promise<any[]> {
-    return prisma.caseTimeline.findMany({
+    return prisma.caseStatusHistory.findMany({
       where: { caseId },
       orderBy: { createdAt: 'asc' },
     });

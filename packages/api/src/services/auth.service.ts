@@ -5,11 +5,19 @@ import { hashPassword, comparePassword } from '../utils/hash';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import { AppError } from '../utils/errors';
 
-const LOCKOUT_TIME = 30 * 60 * 1000; // 30 minutes
+const LOCKOUT_TIME = 30 * 60 * 1000;
 const MAX_LOGIN_ATTEMPTS = 5;
+const REFRESH_TOKEN_DAYS = 7;
 
 export class AuthService {
   constructor(private fastify: FastifyInstance) {}
+
+  private async storeRefreshToken(userId: string, token: string): Promise<void> {
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000);
+    await prisma.refreshToken.create({
+      data: { userId, token, expiresAt },
+    });
+  }
 
   async register(data: RegisterRequest): Promise<AuthTokens> {
     const existingUser = await prisma.user.findUnique({
@@ -25,7 +33,7 @@ export class AuthService {
     const user = await prisma.user.create({
       data: {
         email: data.email,
-        password: hashedPassword,
+        passwordHash: hashedPassword,
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
@@ -42,10 +50,7 @@ export class AuthService {
     const accessToken = generateAccessToken(this.fastify, payload);
     const refreshToken = generateRefreshToken(this.fastify, payload);
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken },
-    });
+    await this.storeRefreshToken(user.id, refreshToken);
 
     return { accessToken, refreshToken };
   }
@@ -59,12 +64,11 @@ export class AuthService {
       throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
     }
 
-    // Check lockout
     if (user.lockedUntil && user.lockedUntil > new Date()) {
       throw new AppError('Account locked due to too many failed attempts', 429, 'ACCOUNT_LOCKED');
     }
 
-    const passwordMatch = await comparePassword(data.password, user.password);
+    const passwordMatch = await comparePassword(data.password, user.passwordHash);
 
     if (!passwordMatch) {
       const failedAttempts = user.failedLoginAttempts + 1;
@@ -82,7 +86,6 @@ export class AuthService {
       throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
     }
 
-    // Reset failed attempts on successful login
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -101,10 +104,7 @@ export class AuthService {
     const accessToken = generateAccessToken(this.fastify, payload);
     const refreshToken = generateRefreshToken(this.fastify, payload);
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken },
-    });
+    await this.storeRefreshToken(user.id, refreshToken);
 
     return { accessToken, refreshToken };
   }
@@ -117,13 +117,27 @@ export class AuthService {
       throw new AppError('Invalid refresh token', 401, 'INVALID_TOKEN');
     }
 
+    const stored = await prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+    });
+
+    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+      throw new AppError('Invalid refresh token', 401, 'INVALID_TOKEN');
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
     });
 
-    if (!user || user.refreshToken !== refreshToken) {
+    if (!user) {
       throw new AppError('Invalid refresh token', 401, 'INVALID_TOKEN');
     }
+
+    // Revoke old token
+    await prisma.refreshToken.update({
+      where: { id: stored.id },
+      data: { revokedAt: new Date() },
+    });
 
     const newPayload: TokenPayload = {
       userId: user.id,
@@ -134,18 +148,15 @@ export class AuthService {
     const accessToken = generateAccessToken(this.fastify, newPayload);
     const newRefreshToken = generateRefreshToken(this.fastify, newPayload);
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken: newRefreshToken },
-    });
+    await this.storeRefreshToken(user.id, newRefreshToken);
 
     return { accessToken, refreshToken: newRefreshToken };
   }
 
   async logout(userId: string): Promise<void> {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { refreshToken: null },
+    await prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
     });
   }
 
@@ -155,27 +166,22 @@ export class AuthService {
     });
 
     if (!user) {
-      // Don't reveal if email exists
       return;
     }
 
-    const resetToken = this.fastify.jwt.sign(
-      { userId: user.id, email: user.email, role: user.role } as const,
+    // Generate reset token as a short-lived JWT (not stored)
+    this.fastify.jwt.sign(
+      { userId: user.id, email: user.email, role: user.role, type: 'reset' },
       { expiresIn: '1h' }
     );
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { resetToken },
-    });
 
     // TODO: Send email with reset token
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
-    let payload: TokenPayload & { type: string };
+    let payload: TokenPayload & { type?: string };
     try {
-      payload = this.fastify.jwt.verify(token) as TokenPayload & { type: string };
+      payload = this.fastify.jwt.verify(token) as TokenPayload & { type?: string };
     } catch {
       throw new AppError('Invalid or expired reset token', 400, 'INVALID_TOKEN');
     }
@@ -189,11 +195,16 @@ export class AuthService {
     await prisma.user.update({
       where: { id: payload.userId },
       data: {
-        password: hashedPassword,
-        resetToken: null,
+        passwordHash: hashedPassword,
         failedLoginAttempts: 0,
         lockedUntil: null,
       },
+    });
+
+    // Revoke all refresh tokens on password reset
+    await prisma.refreshToken.updateMany({
+      where: { userId: payload.userId, revokedAt: null },
+      data: { revokedAt: new Date() },
     });
   }
 }

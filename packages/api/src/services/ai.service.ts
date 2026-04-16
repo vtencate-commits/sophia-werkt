@@ -80,51 +80,51 @@ export class AiService {
 
     const rawAnalysis = message.content[0].type === 'text' ? message.content[0].text : '';
     const deAnonymizedAnalysis = deAnonymizeText(rawAnalysis);
+    const tokensUsed = message.usage.input_tokens + message.usage.output_tokens;
 
-    // Store analysis
-    const analysis = await prisma.aiAnalysis.create({
-      data: {
-        caseId,
-        skillId: skill.id,
-        raw: rawAnalysis,
-        html: deAnonymizedAnalysis,
-        tokensUsed: message.usage.input_tokens + message.usage.output_tokens,
-      },
-    });
-
-    // Update case
-    await prisma.case.update({
+    // Store analysis on the Case record (schema stores analysis as Case fields)
+    const updated = await prisma.case.update({
       where: { id: caseId },
       data: {
+        aiAnalysisRaw: rawAnalysis,
         aiAnalysisHtml: deAnonymizedAnalysis,
         aiAnalysisAt: new Date(),
+        aiTokensUsed: tokensUsed,
         status: 'AI_ANALYSIS_COMPLETE',
       },
     });
 
-    return analysis;
+    return {
+      caseId: updated.id,
+      raw: updated.aiAnalysisRaw,
+      html: updated.aiAnalysisHtml,
+      analyzedAt: updated.aiAnalysisAt,
+      tokensUsed: updated.aiTokensUsed,
+    };
   }
 
   async getAnalysis(caseId: string): Promise<any> {
-    const analysis = await prisma.aiAnalysis.findFirst({
-      where: { caseId },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        skill: true,
-      },
+    const caseData = await prisma.case.findUnique({
+      where: { id: caseId },
     });
 
-    if (!analysis) {
+    if (!caseData || !caseData.aiAnalysisHtml) {
       throw new AppError('No analysis found for this case', 404, 'ANALYSIS_NOT_FOUND');
     }
 
-    return analysis;
+    return {
+      caseId: caseData.id,
+      raw: caseData.aiAnalysisRaw,
+      html: caseData.aiAnalysisHtml,
+      analyzedAt: caseData.aiAnalysisAt,
+      tokensUsed: caseData.aiTokensUsed,
+    };
   }
 
-  async updateAnalysis(analysisId: string, html: string): Promise<any> {
-    return prisma.aiAnalysis.update({
-      where: { id: analysisId },
-      data: { html },
+  async updateAnalysis(caseId: string, html: string): Promise<any> {
+    return prisma.case.update({
+      where: { id: caseId },
+      data: { aiAnalysisHtml: html },
     });
   }
 

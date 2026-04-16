@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/admin/login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/admin/login`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/admin/verify-2fa`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/admin/verify-2fa`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -168,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/logout`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,

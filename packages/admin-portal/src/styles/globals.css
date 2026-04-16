@@ -23,74 +23,98 @@ html {
 }
 
 body {
-  @apply bg-color-surface text-color-text-primary;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
 }
 
-/* Sophia styles */
-.sophia-card {
-  @apply bg-white rounded-lg border border-color-border shadow-sm;
-}
+@layer components {
+  .sophia-card {
+    @apply bg-white rounded-lg shadow-sm;
+    border: 1px solid var(--color-border);
+  }
 
-.sophia-btn {
-  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors;
-}
+  .sophia-btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors;
+  }
 
-.sophia-btn-primary {
-  @apply sophia-btn bg-color-primary text-white hover:bg-color-primary-dark;
-}
+  .sophia-btn-primary {
+    @apply sophia-btn text-white;
+    background-color: var(--color-primary);
+  }
 
-.sophia-btn-secondary {
-  @apply sophia-btn bg-gray-200 text-color-text-primary hover:bg-gray-300;
-}
+  .sophia-btn-primary:hover {
+    background-color: var(--color-primary-dark);
+  }
 
-.sophia-btn-danger {
-  @apply sophia-btn bg-color-danger text-white hover:bg-red-600;
-}
+  .sophia-btn-secondary {
+    @apply sophia-btn bg-gray-200 hover:bg-gray-300;
+    color: var(--color-text-primary);
+  }
 
-.sophia-input {
-  @apply w-full px-3 py-2 border border-color-border rounded-lg text-color-text-primary placeholder-color-text-secondary focus:outline-none focus:ring-2 focus:ring-color-primary focus:border-transparent;
-}
+  .sophia-btn-danger {
+    @apply sophia-btn text-white hover:bg-red-600;
+    background-color: var(--color-danger);
+  }
 
-.sophia-table {
-  @apply w-full border-collapse;
-}
+  .sophia-input {
+    @apply w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+  }
 
-.sophia-table th {
-  @apply bg-gray-100 px-6 py-3 text-left text-sm font-semibold text-color-text-primary border-b border-color-border;
-}
+  .sophia-input::placeholder {
+    color: var(--color-text-secondary);
+  }
 
-.sophia-table td {
-  @apply px-6 py-3 border-b border-color-border text-sm text-color-text-primary;
-}
+  .sophia-input:focus {
+    --tw-ring-color: var(--color-primary);
+  }
 
-.sophia-table tbody tr:hover {
-  @apply bg-gray-50;
-}
+  .sophia-table {
+    @apply w-full border-collapse;
+  }
 
-.sophia-badge {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-}
+  .sophia-table th {
+    @apply bg-gray-100 px-6 py-3 text-left text-sm font-semibold;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+  }
 
-.sophia-badge-success {
-  @apply sophia-badge bg-green-100 text-green-800;
-}
+  .sophia-table td {
+    @apply px-6 py-3 text-sm;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+  }
 
-.sophia-badge-danger {
-  @apply sophia-badge bg-red-100 text-red-800;
-}
+  .sophia-table tbody tr:hover {
+    @apply bg-gray-50;
+  }
 
-.sophia-badge-warning {
-  @apply sophia-badge bg-yellow-100 text-yellow-800;
-}
+  .sophia-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
 
-.sophia-badge-info {
-  @apply sophia-badge bg-blue-100 text-blue-800;
-}
+  .sophia-badge-success {
+    @apply sophia-badge bg-green-100 text-green-800;
+  }
 
-.sophia-modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
-}
+  .sophia-badge-danger {
+    @apply sophia-badge bg-red-100 text-red-800;
+  }
 
-.sophia-modal {
-  @apply bg-white rounded-lg shadow-lg max-w-md w-full mx-4;
+  .sophia-badge-warning {
+    @apply sophia-badge bg-yellow-100 text-yellow-800;
+  }
+
+  .sophia-badge-info {
+    @apply sophia-badge bg-blue-100 text-blue-800;
+  }
+
+  .sophia-modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  }
+
+  .sophia-modal {
+    @apply bg-white rounded-lg shadow-lg max-w-md w-full mx-4;
+  }
 }

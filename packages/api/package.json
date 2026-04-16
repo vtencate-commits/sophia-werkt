@@ -15,6 +15,7 @@
     "@sophia-werkt/shared": "*",
     "@sophia-werkt/db": "*",
     "fastify": "^4.28.0",
+    "fastify-plugin": "^4.5.0",
     "@fastify/cors": "^9.0.0",
     "@fastify/helmet": "^11.1.0",
     "@fastify/rate-limit": "^9.1.0",

@@ -1,10 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 import fastifyRateLimit from '@fastify/rate-limit';
+import fp from 'fastify-plugin';
 import { env } from '../config/env';
 
-export async function rateLimitPlugin(fastify: FastifyInstance): Promise<void> {
+async function rateLimitPluginFn(fastify: FastifyInstance): Promise<void> {
   await fastify.register(fastifyRateLimit, {
     max: env.RATE_LIMIT_MAX,
     timeWindow: '15 minutes',
   });
 }
+
+export const rateLimitPlugin = fp(rateLimitPluginFn);

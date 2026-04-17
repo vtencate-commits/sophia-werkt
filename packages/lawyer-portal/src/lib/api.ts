@@ -26,8 +26,8 @@ async function refreshToken(): Promise<string | null> {
 
     if (response.ok) {
       const data = await response.json()
-      setAuthToken(data.token)
-      return data.token
+      setAuthToken(data.accessToken)
+      return data.accessToken
     }
 
     clearAuthToken()

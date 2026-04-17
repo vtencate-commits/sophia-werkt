@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/admin/login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -89,23 +89,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data = await response.json();
 
-      if (data.requiresTwoFactor) {
-        setSession({
-          ...data.session,
-          accessToken: '',
-          refreshToken: '',
-        });
-        return;
+      // Decode JWT payload to get user info
+      const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
+
+      if (payload.role !== 'ADMIN') {
+        throw new Error('Geen admin rechten. Alleen beheerders kunnen hier inloggen.');
       }
 
       const sessionData: AdminSession = {
-        id: data.admin.id,
-        email: data.admin.email,
-        name: data.admin.name,
-        role: data.admin.role,
+        id: payload.userId,
+        email: payload.email,
+        name: payload.email,
+        role: payload.role as 'ADMIN' | 'SUPERADMIN',
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
-        twoFactorEnabled: data.admin.twoFactorEnabled,
+        twoFactorEnabled: false,
         expiresAt: Date.now() + 3600000, // 1 hour
       };
 

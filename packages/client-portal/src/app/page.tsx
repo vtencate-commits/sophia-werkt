@@ -17,6 +17,12 @@ export default function LandingPage() {
 
   return (
     <div className='min-h-screen bg-white'>
+      {/* Beta disclaimer */}
+      <div className='bg-amber-50 border-b border-amber-200 py-2 px-4 text-center text-sm text-amber-800'>
+        Dit platform is momenteel in <strong>bètaversie</strong>. Functionaliteit en inhoud kunnen nog wijzigen.
+        Neem voor juridisch advies altijd contact op met een advocaat.
+      </div>
+
       {/* Header */}
       <header className='border-b border-gray-100'>
         <div className='mx-auto max-w-6xl px-4 py-4 flex items-center justify-between'>
@@ -48,7 +54,7 @@ export default function LandingPage() {
           <span className='text-sophia-secondary'>snel en toegankelijk</span>
         </h1>
         <p className='mt-6 text-lg text-sophia-muted max-w-2xl mx-auto leading-relaxed'>
-          Sophia Werkt verbindt u direct met gespecialiseerde arbeidsrechtadvocaten van Rassers Advocaten.
+          Sophia Werkt verbindt u direct met gespecialiseerde arbeidsrechtadvocaten van Sressar Advocaten.
           Upload uw documenten, ontvang een deskundige analyse en persoonlijk advies, alles via een veilig online platform.
         </p>
         <div className='mt-10 flex items-center justify-center gap-4'>
@@ -133,7 +139,7 @@ export default function LandingPage() {
           <div className='grid gap-8 md:grid-cols-2 max-w-4xl mx-auto'>
             <FeatureItem
               title='Gespecialiseerde advocaten'
-              description='Uw dossier wordt behandeld door advocaten van Rassers Advocaten met jarenlange ervaring in het arbeidsrecht.'
+              description='Uw dossier wordt behandeld door advocaten van Sressar Advocaten met jarenlange ervaring in het arbeidsrecht.'
             />
             <FeatureItem
               title='Veilig en vertrouwelijk'
@@ -179,14 +185,14 @@ export default function LandingPage() {
                 <span className='font-bold text-sophia-primary'>Sophia Werkt</span>
               </div>
               <p className='text-sm text-sophia-muted'>
-                Een initiatief van Rassers Advocaten.
+                Een initiatief van Sressar Advocaten.
                 Gespecialiseerd arbeidsrechtelijk advies, ondersteund door AI-technologie.
               </p>
             </div>
             <div>
               <h3 className='font-semibold text-sophia-text mb-3'>Contact</h3>
               <p className='text-sm text-sophia-muted'>
-                Rassers Advocaten<br />
+                Sressar Advocaten<br />
                 Sophiastraat 24<br />
                 4811 EL Breda<br />
                 info@sophiawerkt.nl
@@ -195,13 +201,13 @@ export default function LandingPage() {
             <div>
               <h3 className='font-semibold text-sophia-text mb-3'>Juridisch</h3>
               <p className='text-sm text-sophia-muted'>
-                Alle diensten worden verricht door Rassers N.V. onder toepasselijkheid van de Algemene Voorwaarden voor de Rechtspraktijk.
+                Alle diensten worden verricht door Sressar N.V. onder toepasselijkheid van de Algemene Voorwaarden voor de Rechtspraktijk.
                 Ingeschreven bij de KvK te Breda.
               </p>
             </div>
           </div>
           <div className='mt-8 pt-6 border-t border-gray-100 text-center text-sm text-sophia-muted'>
-            © {new Date().getFullYear()} Rassers N.V. Alle rechten voorbehouden.
+            © {new Date().getFullYear()} Sressar N.V. Alle rechten voorbehouden.
           </div>
         </div>
       </footer>

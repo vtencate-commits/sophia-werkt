@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await apiRequest<{ token: string; lawyer: Lawyer }>(
+      const response = await apiRequest<{ accessToken: string; refreshToken: string; user?: Lawyer }>(
         '/auth/login',
         {
           method: 'POST',
@@ -83,9 +83,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       )
 
-      setAuthToken(response.token)
-      setLawyer(response.lawyer)
-      localStorage.setItem(LAWYER_KEY, JSON.stringify(response.lawyer))
+      setAuthToken(response.accessToken)
+      if (response.user) {
+        setLawyer(response.user)
+        localStorage.setItem(LAWYER_KEY, JSON.stringify(response.user))
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed'
       setError(message)
